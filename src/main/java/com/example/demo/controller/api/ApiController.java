@@ -23,6 +23,11 @@ public class ApiController {
   @Autowired
   UserService userService;
 
+  @GetMapping("/test")
+  public String test() {
+    return "test";
+  }
+
   @GetMapping("/user")
   public Response<List<User>> getAllUser() {
     logger.info("get all user's info.");
