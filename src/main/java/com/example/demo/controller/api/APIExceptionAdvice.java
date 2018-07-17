@@ -18,8 +18,8 @@ public class APIExceptionAdvice {
 
   private static final Logger logger = LoggerFactory.getLogger(APIExceptionAdvice.class);
 
-  @ExceptionHandler(value = {IllegalArgumentException.class, HttpMessageNotReadableException.class,
-      MissingServletRequestParameterException.class, ServletRequestBindingException.class})
+  @ExceptionHandler(value = {IllegalArgumentException.class, HttpMessageNotReadableException.class, MissingServletRequestParameterException.class,
+      ServletRequestBindingException.class})
   public ResponseEntity<Response<?>> IllegalArgumentExceptionHandler(Exception e, WebRequest request) {
     logger.info(e.getMessage(), e);
     return new ResponseEntity<Response<?>>(new Response<>("400.001", "failure", "參數錯誤"), HttpStatus.OK);
