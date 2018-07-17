@@ -2,7 +2,7 @@ package com.example.demo.model.line_bot.vo;
 
 import java.util.List;
 
-public class Line {
+public class LineMessage {
 
   private List<Event> events;
 
