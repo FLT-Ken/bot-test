@@ -39,7 +39,7 @@ public class LineBotServiceImpl implements LineBotService {
     System.out.println("ACCESS_TOKEN: " + ACCESS_TOKEN);
     LineMessagingClient client = LineMessagingClient.builder(ACCESS_TOKEN).build();
     ReplyMessage replyMessage = new ReplyMessage(replyToken, this.getText(text));
-    System.out.println(gson.toJson(replyMessage));
+    System.out.println("replyMessage: " + gson.toJson(replyMessage));
     try {
       client.replyMessage(replyMessage).get();
     } catch (InterruptedException | ExecutionException e) {
