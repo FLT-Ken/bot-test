@@ -22,17 +22,17 @@ public class LineBotServiceImpl implements LineBotService {
 
   @Override
   public void reply(LineMessage lineMessage) {
-//    for (Event event : lineMessage.getEvents()) {
-//      switch (event.getType()) {
-//        case "message":
-//          switch (event.getMessage().getType()) {
-//            case "text":
-//              this.sendResponseMessages(event.getReplyToken(), event.getMessage().getText());
-//              break;
-//          }
-//          break;
-//      }
-//    }
+    for (Event event : lineMessage.getEvents()) {
+      switch (event.getType()) {
+        case "message":
+          switch (event.getMessage().getType()) {
+            case "text":
+              this.sendResponseMessages(event.getReplyToken(), event.getMessage().getText());
+              break;
+          }
+          break;
+      }
+    }
   }
 
   private void sendResponseMessages(String replyToken, String text) {
