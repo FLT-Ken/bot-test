@@ -11,7 +11,6 @@ import com.google.gson.Gson;
 import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.message.TextMessage;
-import com.linecorp.bot.model.response.BotApiResponse;
 
 @Service
 public class LineBotServiceImpl implements LineBotService {
@@ -37,16 +36,16 @@ public class LineBotServiceImpl implements LineBotService {
   }
 
   private void sendResponseMessages(String replyToken, String text) {
+    System.out.println("ACCESS_TOKEN: " + ACCESS_TOKEN);
     LineMessagingClient client = LineMessagingClient.builder(ACCESS_TOKEN).build();
     ReplyMessage replyMessage = new ReplyMessage(replyToken, this.getText(text));
-    BotApiResponse botApiResponse;
+    System.out.println(gson.toJson(replyMessage));
     try {
-      botApiResponse = client.replyMessage(replyMessage).get();
+      client.replyMessage(replyMessage).get();
     } catch (InterruptedException | ExecutionException e) {
       e.printStackTrace();
       return;
     }
-    System.out.println(botApiResponse);
   }
 
   private TextMessage getText(String originText) {
