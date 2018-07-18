@@ -7,6 +7,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.demo.model.line_bot.vo.Event;
@@ -14,6 +15,7 @@ import com.example.demo.model.line_bot.vo.LineMessage;
 import com.example.demo.model.line_bot.vo.Message;
 import com.example.demo.service.LineBotService;
 
+@Service
 public class LineBotServiceImpl implements LineBotService {
 
   @Value("${line.bot.access.token}")
