@@ -1,25 +1,25 @@
 package com.example.demo.service.impl;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import java.util.concurrent.ExecutionException;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import com.example.demo.model.line_bot.vo.Event;
 import com.example.demo.model.line_bot.vo.LineMessage;
-import com.example.demo.model.line_bot.vo.Message;
 import com.example.demo.service.LineBotService;
+import com.google.gson.Gson;
+import com.linecorp.bot.client.LineMessagingClient;
+import com.linecorp.bot.model.ReplyMessage;
+import com.linecorp.bot.model.message.TextMessage;
+import com.linecorp.bot.model.response.BotApiResponse;
 
 @Service
 public class LineBotServiceImpl implements LineBotService {
 
   @Value("${line.bot.access.token}")
   private String ACCESS_TOKEN;
+
+  private Gson gson = new Gson();
 
   @Override
   public void reply(LineMessage lineMessage) {
@@ -37,30 +37,25 @@ public class LineBotServiceImpl implements LineBotService {
   }
 
   private void sendResponseMessages(String replyToken, String text) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
-    headers.add("Authorization", "Bearer " + ACCESS_TOKEN);
-
-    Event event = new Event(replyToken, new Message("text", this.getText(text)));
-
-    HttpEntity<Event> entity = new HttpEntity<Event>(event, headers);
-
-    RestTemplate restTemplate = new RestTemplate();
-    ResponseEntity<String> lineResponse = restTemplate.exchange("https://api.line.me/v2/bot/message/reply", HttpMethod.POST, entity, String.class);
-    if (lineResponse.getStatusCode() == HttpStatus.OK) {
-      System.out.println("seccess");
-    } else {
-      System.out.println("fail");
+    LineMessagingClient client = LineMessagingClient.builder(ACCESS_TOKEN).build();
+    ReplyMessage replyMessage = new ReplyMessage(replyToken, this.getText(text));
+    BotApiResponse botApiResponse;
+    try {
+      botApiResponse = client.replyMessage(replyMessage).get();
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
+      return;
     }
+    System.out.println(botApiResponse);
   }
 
-  private String getText(String originText) {
+  private TextMessage getText(String originText) {
     String reply = originText;
     if (originText.contains("安安")) {
       reply = "尼好~";
     } else if (originText.contains("因該")) {
       reply = "應啦幹";
     }
-    return reply;
+    return new TextMessage(reply);
   }
 }
