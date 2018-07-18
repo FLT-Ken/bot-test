@@ -2,6 +2,13 @@ package com.example.demo.model.line_bot.vo;
 
 public class Event {
 
+  public Event() {}
+
+  public Event(String replyToken, Message message) {
+    this.replyToken = replyToken;
+    this.message = message;
+  }
+
   private String replyToken;
 
   private String type;

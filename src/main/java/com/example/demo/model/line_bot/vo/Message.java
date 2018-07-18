@@ -2,6 +2,13 @@ package com.example.demo.model.line_bot.vo;
 
 public class Message {
 
+  public Message() {}
+
+  public Message(String type, String text) {
+    this.type = type;
+    this.text = text;
+  }
+
   private String id;
 
   private String type;
