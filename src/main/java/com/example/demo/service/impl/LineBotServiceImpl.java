@@ -2,14 +2,18 @@ package com.example.demo.service.impl;
 
 import java.util.concurrent.ExecutionException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.example.demo.model.line_bot.vo.Event;
 import com.example.demo.model.line_bot.vo.LineMessage;
+import com.example.demo.model.mongo.dao.ReplyRepository;
+import com.example.demo.model.mongo.vo.Reply;
 import com.example.demo.service.LineBotService;
 import com.google.gson.Gson;
 import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.ReplyMessage;
+import com.linecorp.bot.model.message.StickerMessage;
 import com.linecorp.bot.model.message.TextMessage;
 
 @Service
@@ -18,7 +22,11 @@ public class LineBotServiceImpl implements LineBotService {
   @Value("${line.bot.access.token}")
   private String ACCESS_TOKEN;
 
-  private Gson gson = new Gson();
+  @Autowired
+  Gson gson = new Gson();
+
+  @Autowired
+  ReplyRepository replyRepository;
 
   @Override
   public void reply(LineMessage lineMessage) {
@@ -27,7 +35,10 @@ public class LineBotServiceImpl implements LineBotService {
         case "message":
           switch (event.getMessage().getType()) {
             case "text":
-              this.sendResponseMessages(event.getReplyToken(), event.getMessage().getText());
+              this.replyText(event);
+              break;
+            case "sticker":
+              this.replySticker(event);
               break;
           }
           break;
@@ -35,26 +46,66 @@ public class LineBotServiceImpl implements LineBotService {
     }
   }
 
-  private void sendResponseMessages(String replyToken, String text) {
-    System.out.println("ACCESS_TOKEN: " + ACCESS_TOKEN);
+  private void replyText(Event event) {
+    String recieveText = event.getMessage().getText();
+    TextMessage textMessage = null;
+    if (recieveText.contains("學說話/")) {
+      textMessage = learn(recieveText);
+    } else {
+      textMessage = this.setText(recieveText);
+    }
+    replyToLineBot(new ReplyMessage(event.getReplyToken(), textMessage));
+  }
+
+  private TextMessage learn(String recieveText) {
+    String response = recieveText;
+    recieveText = recieveText.substring(recieveText.indexOf("話/") + 2);
+    String keyWordAndReply[] = recieveText.split("/");
+    response = "格式錯囉! 你要我學啥??";
+    if (keyWordAndReply.length > 1) {
+      Reply reply = new Reply(keyWordAndReply[0], keyWordAndReply[1]);
+      replyRepository.save(reply);
+      response = "好喔~好喔~";
+    }
+    return new TextMessage(response);
+  }
+
+  private void replySticker(Event event) {
+    StickerMessage stickerMessage = new StickerMessage(event.getMessage().getPackageId(), event.getMessage().getStickerId());
+    replyToLineBot(new ReplyMessage(event.getReplyToken(), stickerMessage));
+  }
+
+  private TextMessage setText(String text) {
+    String replyText = text;
+    Reply reply = replyRepository.findByKeyWord(text);
+    if (reply != null) {
+      replyText = reply.getReply();
+    }
+    return new TextMessage(replyText);
+  }
+
+  private void replyToLineBot(ReplyMessage replyMessage) {
     LineMessagingClient client = LineMessagingClient.builder(ACCESS_TOKEN).build();
-    ReplyMessage replyMessage = new ReplyMessage(replyToken, this.getText(text));
-    System.out.println("replyMessage: " + gson.toJson(replyMessage));
     try {
       client.replyMessage(replyMessage).get();
     } catch (InterruptedException | ExecutionException e) {
       e.printStackTrace();
-      return;
     }
   }
 
-  private TextMessage getText(String originText) {
-    String reply = originText;
-    if (originText.contains("安安")) {
-      reply = "尼好~";
-    } else if (originText.contains("因該")) {
-      reply = "應啦幹";
+  public static void main(String a[]) {
+    String s = "學說話/安安/尼好~";
+    if (s.contains("學說話/")) {
+      s = s.substring(s.indexOf("話/") + 2);
+      String ss[] = s.split("/");
+      if (ss.length > 1) {
+        Reply r = new Reply(ss[0], ss[1]);
+        System.out.println(new Gson().toJson(r));
+      } else {
+        System.out.println("格式錯囉! 你想要我學啥??");
+      }
+    } else {
+      System.out.println(s);
     }
-    return new TextMessage(reply);
   }
 }
