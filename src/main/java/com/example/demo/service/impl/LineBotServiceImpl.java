@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,13 +78,17 @@ public class LineBotServiceImpl implements LineBotService {
 
   private TextMessage setText(String recieveText) {
     String replyText = recieveText;
-    Reply reply = replyRepository.findByKeyWord(recieveText);
-    if (reply != null) {
+    Reply reply = null;
+    List<Reply> replies = replyRepository.findByKeyWord(recieveText);
+    if (replies != null && replies.size() > 0) {
+      reply = replies.get((int) (Math.random() * replies.size()));
       replyText = reply.getReply();
     } else if (recieveText.contains("因該")) {
-      replyText = replyRepository.findByKeyWord("因該").getReply();
+      replies = replyRepository.findByKeyWord("因該");
+      replyText = replies.get((int) (Math.random() * replies.size())).getReply();
     } else if (recieveText.contains("大") && recieveText.contains("聲")) {
-      replyText = replyRepository.findByKeyWord("大聲").getReply();
+      replies = replyRepository.findByKeyWord("大聲");
+      replyText = replies.get((int) (Math.random() * replies.size())).getReply();
     } else {
       replyText = recieveText;
     }
