@@ -61,7 +61,7 @@ public class LineBotServiceImpl implements LineBotService {
     String response = recieveText;
     recieveText = recieveText.substring(recieveText.indexOf("話;") + 2);
     String keyWordAndReply[] = recieveText.split(";");
-    response = "格式錯囉! 你要我學啥??";
+    response = "格式錯啦! 回去重打!";
     if (keyWordAndReply.length > 1) {
       Reply reply = new Reply(keyWordAndReply[0], keyWordAndReply[1]);
       replyRepository.save(reply);
@@ -82,6 +82,8 @@ public class LineBotServiceImpl implements LineBotService {
       replyText = reply.getReply();
     } else if (recieveText.contains("因該")) {
       replyText = replyRepository.findByKeyWord("因該").getReply();
+    } else if (recieveText.contains("大") && recieveText.contains("聲")) {
+      replyText = replyRepository.findByKeyWord("大聲").getReply();
     } else {
       replyText = recieveText;
     }
