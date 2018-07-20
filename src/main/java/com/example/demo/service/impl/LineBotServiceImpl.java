@@ -49,7 +49,7 @@ public class LineBotServiceImpl implements LineBotService {
   private void replyText(Event event) {
     String recieveText = event.getMessage().getText();
     TextMessage textMessage = null;
-    if (recieveText.contains("學說話/")) {
+    if (recieveText.contains("學說話;")) {
       textMessage = learn(recieveText);
     } else {
       textMessage = this.setText(recieveText);
@@ -59,8 +59,8 @@ public class LineBotServiceImpl implements LineBotService {
 
   private TextMessage learn(String recieveText) {
     String response = recieveText;
-    recieveText = recieveText.substring(recieveText.indexOf("話/") + 2);
-    String keyWordAndReply[] = recieveText.split("/");
+    recieveText = recieveText.substring(recieveText.indexOf("話;") + 2);
+    String keyWordAndReply[] = recieveText.split(";");
     response = "格式錯囉! 你要我學啥??";
     if (keyWordAndReply.length > 1) {
       Reply reply = new Reply(keyWordAndReply[0], keyWordAndReply[1]);
@@ -75,11 +75,15 @@ public class LineBotServiceImpl implements LineBotService {
     replyToLineBot(new ReplyMessage(event.getReplyToken(), stickerMessage));
   }
 
-  private TextMessage setText(String text) {
-    String replyText = text;
-    Reply reply = replyRepository.findByKeyWord(text);
+  private TextMessage setText(String recieveText) {
+    String replyText = recieveText;
+    Reply reply = replyRepository.findByKeyWord(recieveText);
     if (reply != null) {
       replyText = reply.getReply();
+    } else if (recieveText.contains("因該")) {
+      replyText = replyRepository.findByKeyWord("因該").getReply();
+    } else {
+      replyText = recieveText;
     }
     return new TextMessage(replyText);
   }
@@ -90,22 +94,6 @@ public class LineBotServiceImpl implements LineBotService {
       client.replyMessage(replyMessage).get();
     } catch (InterruptedException | ExecutionException e) {
       e.printStackTrace();
-    }
-  }
-
-  public static void main(String a[]) {
-    String s = "學說話/安安/尼好~";
-    if (s.contains("學說話/")) {
-      s = s.substring(s.indexOf("話/") + 2);
-      String ss[] = s.split("/");
-      if (ss.length > 1) {
-        Reply r = new Reply(ss[0], ss[1]);
-        System.out.println(new Gson().toJson(r));
-      } else {
-        System.out.println("格式錯囉! 你想要我學啥??");
-      }
-    } else {
-      System.out.println(s);
     }
   }
 }
